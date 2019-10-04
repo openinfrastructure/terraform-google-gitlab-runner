@@ -72,7 +72,8 @@ resource google_compute_instance_template "gitlab-runner" {
   }
 
   scheduling {
-    automatic_restart = true
+    preemptible       = var.preemptible
+    automatic_restart = var.automatic_restart
   }
 
   lifecycle {

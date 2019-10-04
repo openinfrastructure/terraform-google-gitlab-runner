@@ -115,3 +115,15 @@ variable "update_policy_type" {
   description = "The type of update. Valid values are 'OPPORTUNISTIC', 'PROACTIVE'"
   default     = "OPPORTUNISTIC"
 }
+
+variable "automatic_restart" {
+  description = "If true, automatically restart instances on maintenance events.  See https://cloud.google.com/compute/docs/instances/live-migration#autorestart"
+  type        = bool
+  default     = false
+}
+
+variable "preemptible" {
+  description = "If true, create preemptible VM instances intended to reduce cost.  Note, the MIG will recreate pre-empted instnaces.  See https://cloud.google.com/compute/docs/instances/preemptible"
+  type        = bool
+  default     = true
+}
