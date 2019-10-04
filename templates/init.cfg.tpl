@@ -19,6 +19,27 @@ write_files:
     content: |
       #! /bin/bash
       iptables -w -A INPUT -p tcp --dport ${hc_port} -j ACCEPT
+  - path: /var/run/gitlab-runner-register
+    permissions: 0600
+    owner: root
+    content: |
+      REGISTRATION_TOKEN=${registration_token}
+  - path: /etc/systemd/system/gitlab-runner-register.service
+    permissions: 0644
+    owner: root
+    content: |
+      [Unit]
+      Description=GitLab Runner Registration/Unregistration
+      ConditionFileIsExecutable=/var/lib/google/bin/gitlab-runner
+      After=syslog.target network-online.target
+      [Service]
+      EnvironmentFile=/var/run/gitlab-runner-register
+      Type=oneshot
+      RemainAfterExit=yes
+      ExecStart=/var/lib/google/bin/gitlab-runner "register" "--non-interactive" "--url" "${gitlab-url}" "--executor" "docker" --docker-image alpine:latest --tag-list "${tag-list}" --run-untagged="true" --locked="false" --access-level="not_protected"
+      ExecStop=/var/lib/google/bin/gitlab-runner "unregister" "--config" "/etc/gitlab-runner/config.toml" "--all-runners"
+      [Install]
+      WantedBy=multi-user.target
   - path: /etc/systemd/system/gitlab-runner.service
     permissions: 0644
     owner: root
@@ -26,7 +47,8 @@ write_files:
       [Unit]
       Description=GitLab Runner
       ConditionFileIsExecutable=/var/lib/google/bin/gitlab-runner
-      After=syslog.target network-online.target
+      After=gitlab-runner-register.service syslog.target network-online.target
+      Requires=gitlab-runner-register.service
       [Service]
       StartLimitInterval=5
       StartLimitBurst=10
@@ -54,7 +76,7 @@ runcmd:
   - mkdir /var/lib/google/bin
   - curl -L --output /var/lib/google/tmp/gitlab-runner ${gitlab-runner-url}
   - install -o 0 -g 0 -m 0755 /var/lib/google/tmp/gitlab-runner /var/lib/google/bin/gitlab-runner
-  - /var/lib/google/bin/gitlab-runner register --non-interactive --url "${gitlab-url}" --registration-token "${registration_token}" --executor "docker" --docker-image alpine:latest --tag-list "${tag-list}" --run-untagged="true" --locked="false" --access-level="not_protected"
   - systemctl daemon-reload
   - systemctl start firewall.service
+  - systemctl start gitlab-runner-register.service
   - systemctl start gitlab-runner.service

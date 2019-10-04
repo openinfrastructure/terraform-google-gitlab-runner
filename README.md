@@ -1,10 +1,21 @@
 # Overview
 
 This module creates a managed instance group of VM instances running
-gilab-runner instances.  [Container Optimized OS][cos] images are used to
+gitlab-runner instances.  [Container Optimized OS][cos] images are used to
 simplify updates and management of the Docker host.  [gitlab-runner][1] is
 installed into the VM host (not as a container) and registered to gitlab via
 [cloud-init][2].
+
+# Features
+
+ 1. Automatic gitlab-runner registration to gitlab.com
+ 2. Instances are preemptible by default, [reducing cost by 70 to
+    80%][discount].
+ 2. Automatically unregister on [preemption][preemption], reboot, shutdown to
+    clean up.
+ 3. Managed instance group automatically restarts preempted instances.
+ 4. Health checking against the gitlab-runner Prometheus metrics endpoint.
+ 5. Unhealthy instances are terminated and re-created.
 
 # Example Usage
 
@@ -42,7 +53,7 @@ module gitlab-runner-private {
 
 ## Update instances
 
-Run terraform apply to update the instance teplate, then replace the instances
+Run terraform apply to update the instance template, then replace the instances
 with new ones using:
 
 ```bash
@@ -60,3 +71,5 @@ execution steps.
 [cos]: https://cloud.google.com/container-optimized-os/docs/how-to/run-container-instance
 [1]: https://docs.gitlab.com/runner/
 [2]: https://cloudinit.readthedocs.io/en/latest/
+[preempt]: https://cloud.google.com/compute/docs/instances/preemptible#preemption_process
+[discount]: https://cloud.google.com/preemptible-vms/
