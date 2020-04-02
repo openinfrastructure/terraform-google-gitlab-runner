@@ -127,3 +127,8 @@ variable "preemptible" {
   type        = bool
   default     = true
 }
+
+variable "concurrent" {
+  description = "How many jobs can be run concurrently.  See https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-global-section"
+  default     = "8"
+}
