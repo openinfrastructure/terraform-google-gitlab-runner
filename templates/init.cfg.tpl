@@ -13,6 +13,7 @@ write_files:
     content: |
       # Prometheus metrics at /metrics, also used for health checks.
       listen_address = ":${hc_port}"
+      concurrent = ${concurrent}
   - path: /var/lib/cloud/bin/firewall
     permissions: 0755
     owner: root

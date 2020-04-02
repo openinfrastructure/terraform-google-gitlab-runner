@@ -29,6 +29,7 @@ data "template_file" "cloud-init" {
     registration_token = var.registration_token
     tag-list           = local.tag-list
     hc_port            = var.hc_port
+    concurrent         = var.concurrent
   }
 }
 
