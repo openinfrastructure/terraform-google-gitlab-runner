@@ -40,11 +40,6 @@ variable "region" {
   default     = "us-west1"
 }
 
-variable "zone" {
-  description = "The zone to deploy resources into."
-  default     = "us-west1-b"
-}
-
 variable "os_image" {
   description = "The OS image for VM instances"
   default     = "cos-cloud/cos-stable"

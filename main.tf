@@ -46,6 +46,11 @@ data "template_cloudinit_config" "cloud-config" {
   }
 }
 
+# Shutdown script to de-register the runner when preempted.
+data "template_file" "shutdown-script" {
+  template = "${file("${path.module}/templates/shutdown-script.tpl")}"
+}
+
 resource google_compute_instance_template "gitlab-runner" {
   name_prefix  = "${var.name}-"
   machine_type = var.machine_type
@@ -70,6 +75,8 @@ resource google_compute_instance_template "gitlab-runner" {
   metadata = {
     # cloud-init used to setup gitlab-runner
     user-data = data.template_cloudinit_config.cloud-config.rendered
+    # de-register on shutdown
+    shutdown-script = data.template_file.shutdown-script.rendered
   }
 
   scheduling {
@@ -87,21 +94,24 @@ resource google_compute_instance_template "gitlab-runner" {
   }
 }
 
-resource "google_compute_instance_group_manager" "gitlab-runner" {
-  provider = google-beta
+resource "google_compute_region_instance_group_manager" "gitlab-runner" {
   project  = var.project
   name     = var.name
 
   base_instance_name = var.name
 
-  zone = var.zone
+  region = var.region
+  distribution_policy_zones = [
+    "${var.region}-a",
+    "${var.region}-b",
+    "${var.region}-c",
+  ]
 
   update_policy {
-    type                  = var.update_policy_type
-    minimal_action        = "REPLACE"
-    max_surge_percent     = 20
-    max_unavailable_fixed = 1
-    min_ready_sec         = 120
+    type            = var.update_policy_type
+    minimal_action  = "REPLACE"
+    max_surge_fixed = 3
+    min_ready_sec   = 30
   }
 
   target_size = var.num_instances
