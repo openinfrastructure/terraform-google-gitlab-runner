@@ -57,7 +57,7 @@ variable "subnetwork" {
 
 variable "subnetwork_project" {
   description = "The project hosting the subnet"
-  type        = "string"
+  type        = string
   default     = null
 }
 
