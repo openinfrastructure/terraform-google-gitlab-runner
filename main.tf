@@ -82,13 +82,13 @@ resource google_compute_instance_template "gitlab-runner" {
   }
 
   service_account {
-    email = "${local.service_account_email}"
+    email  = local.service_account_email
     scopes = ["cloud-platform"]
   }
 }
 
 resource "google_compute_instance_group_manager" "gitlab-runner" {
-  provider = "google-beta"
+  provider = google-beta
   project  = var.project
   name     = var.name
 
